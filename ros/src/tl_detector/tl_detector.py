@@ -110,12 +110,12 @@ class TLDetector(object):
 
         """
         #TODO implement
-        closest_idx = self.waypoint_tree.query([pose.position.x, pose.position.x], 1)[1]
+        closest_idx = self.waypoint_tree.query([pose.pose.position.x, pose.pose.position.x], 1)[1]
         closest_pt = self.waypoints_2d[closest_idx]
         prev_pt = self.waypoints_2d[(closest_idx - 1) % len(self.waypoints_2d)]
         cl_vec = np.array(closest_pt)
         prev_vec = np.array(prev_pt)
-        curren_pos = np.array([pose.position.x, pose.position.x])
+        curren_pos = np.array([pose.pose.position.x, pose.pose.position.x])
         val = np.dot(cl_vec - prev_vec, curren_pos - cl_vec);
         if (val > 0):
             closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
@@ -160,7 +160,7 @@ class TLDetector(object):
         
         #TODO find the closest visible traffic light (if one exists)
         if(self.pose):
-            car_wp_idx = self.get_closest_waypoint(self.pose.pose)
+            car_wp_idx = self.get_closest_waypoint(self.pose)
             closest_diff = LOOKAHEAD
             for i in range(len(self.lights)):
                 light_pos = stop_line_positions[i]

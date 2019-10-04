@@ -3,6 +3,7 @@
 import rospy
 from geometry_msgs.msg import PoseStamped
 from styx_msgs.msg import Lane, Waypoint
+from std_msgs.msg import Int32
 
 from scipy.spatial import KDTree
 import numpy as np
@@ -76,15 +77,15 @@ class WaypointUpdater(object):
 
 
     def get_closest_waypoint_idx(self):
-        x = self.pose.position.x
-        y = self.pose.position.y
+        x = self.pose.pose.position.x
+        y = self.pose.pose.position.y
         closest_idx =  self.kdtree.query([x,y],1)[1]
 
         closest_coord = self.waypoints_2d[closest_idx]
         pre_coord = self.waypoints_2d[closest_idx-1]
 
         cl_vect = np.array(closest_coord)
-        prev_vect = np.array(prev_coord)
+        prev_vect = np.array(pre_coord)
         pos_vect = np.array([x, y])
 
         val = np.dot(cl_vect - prev_vect, pos_vect - cl_vect)
