@@ -24,15 +24,16 @@ as well as to verify your TL classifier.
 TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
-LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
+LOOKAHEAD_WPS = 100 # Number of waypoints we will publish. You can change this number
 PUBLISHING_RATE = 50
 MAX_DECEL = 0.5
 
-def get_waypoint_velocity(self, waypoint):
+def get_waypoint_velocity(waypoint):
     return waypoint.twist.twist.linear.x
 
-def set_waypoint_velocity(self, waypoints, waypoint, velocity):
-    waypoints[waypoint].twist.twist.linear.x = velocity
+def set_waypoint_velocity(waypoint, velocity):
+    waypoint.twist.twist.linear.x = velocity
+    return waypoint
 
 
 class WaypointUpdater(object):
@@ -121,7 +122,7 @@ class WaypointUpdater(object):
             dec_vel = math.sqrt(2 * MAX_DECEL * dist)
             if dec_vel < 1:
                 dec_vel = 0.0
-            set_waypoint_velocity(wp, min(dec_vel, get_waypoint_velocity(wp)))
+            wp = set_waypoint_velocity(wp, min(dec_vel, get_waypoint_velocity(wp)))
             lane_wps.append(wp)
         return lane_wps
 
