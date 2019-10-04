@@ -103,12 +103,14 @@ class WaypointUpdater(object):
         end_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_waypoints[closest_idx:end_idx]
 
-        if (self.stop_line_wp == -1 or self.stop_line_wp > last_index):
+        if (self.stop_line_wp == -1 or self.stop_line_wp > end_idx):
             lane.waypoints = base_waypoints
         else:
-            dist_to_light = self.stop_line_wp - closest_wp_index
+            dist_to_light = self.stop_line_wp - closest_idx
             lane.waypoints = self.decelerate(base_waypoints, dist_to_light)
-
+#             rospy.loginfo("dist to light {} and speed before {} after {}".format(dist_to_light, \
+#                                                                                  get_waypoint_velocity(base_waypoints[0]), \
+#                                                                                  get_waypoint_velocity(lane.waypoints[0])))
         self.final_waypoints_pub.publish(lane)
 
 
@@ -142,6 +144,7 @@ class WaypointUpdater(object):
         # TODO: Callback for /traffic_waypoint message. Implement
         if (msg.data != self.stop_line_wp):
             self.stop_line_wp = msg.data
+            rospy.loginfo("received stop line wp idx {}".format(msg.data))
 
     def obstacle_cb(self, msg):
         # TODO: Callback for /obstacle_waypoint message. We will implement it later

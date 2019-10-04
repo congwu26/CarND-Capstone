@@ -45,11 +45,12 @@ class TLDetector(object):
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+#         self.light_classifier = TLClassifier()
 
         self.state = TrafficLight.UNKNOWN
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
+        self.has_image = False
         self.image_counter = 0
         self.state_count = 0
 
@@ -69,6 +70,19 @@ class TLDetector(object):
 
     def traffic_cb(self, msg):
         self.lights = msg.lights
+#         light_wp, state = self.process_traffic_lights()
+#         if self.state != state:
+#             self.state_count = 0
+#             self.state = state
+#         elif self.state_count >= STATE_COUNT_THRESHOLD:
+#             self.last_state = self.state
+#             light_wp = light_wp if state == TrafficLight.RED else -1
+#             self.last_wp = light_wp
+#             self.upcoming_red_light_pub.publish(Int32(light_wp))
+#         else:
+#             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+#         self.state_count += 1
+        
 
     def image_cb(self, msg):
         """Identifies red lights in the incoming camera image and publishes the index
@@ -105,7 +119,7 @@ class TLDetector(object):
         self.image_counter = (self.image_counter + 1) % IMAGE_TO_CHECK
 
 
-    def get_closest_waypoint(self, pose):
+    def get_closest_waypoint(self, pose_vec):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
         Args:
@@ -116,12 +130,12 @@ class TLDetector(object):
 
         """
         #TODO implement
-        closest_idx = self.waypoint_tree.query([pose.pose.position.x, pose.pose.position.x], 1)[1]
+        closest_idx = self.waypoint_tree.query(pose_vec, 1)[1]
         closest_pt = self.waypoints_2d[closest_idx]
         prev_pt = self.waypoints_2d[(closest_idx - 1) % len(self.waypoints_2d)]
         cl_vec = np.array(closest_pt)
         prev_vec = np.array(prev_pt)
-        curren_pos = np.array([pose.pose.position.x, pose.pose.position.x])
+        curren_pos = np.array(pose_vec)
         val = np.dot(cl_vec - prev_vec, curren_pos - cl_vec);
         if (val > 0):
             closest_idx = (closest_idx + 1) % len(self.waypoints_2d)
@@ -141,11 +155,12 @@ class TLDetector(object):
             self.prev_light_loc = None
             return TrafficLight.UNKNOWN
 
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+#         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
         #Get classification
         if self.config['is_site']:
-            return self.light_classifier.get_classification(cv_image)
+#             return self.light_classifier.get_classification(cv_image)
+            return light.state
         else:
             return light.state
 
@@ -168,7 +183,7 @@ class TLDetector(object):
         
         #TODO find the closest visible traffic light (if one exists)
         if(self.pose):
-            car_wp_idx = self.get_closest_waypoint(self.pose)
+            car_wp_idx = self.get_closest_waypoint([self.pose.pose.position.x, self.pose.pose.position.y])
             closest_diff = LOOKAHEAD
             for i in range(len(self.lights)):
                 light_pos = stop_line_positions[i]
@@ -177,7 +192,7 @@ class TLDetector(object):
                 if light_wp_idx < car_wp_idx:
                     continue;
                 
-                diff = light_idx - wp_idx
+                diff = light_wp_idx - car_wp_idx
                 if diff < closest_diff:
                     closest_diff = diff
                     closest_light = self.lights[i]
