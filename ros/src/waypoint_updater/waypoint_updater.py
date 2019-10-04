@@ -25,6 +25,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 
 LOOKAHEAD_WPS = 200 # Number of waypoints we will publish. You can change this number
 PUBLISHING_RATE = 50
+MAX_DECEL = 0.5
 
 def get_waypoint_velocity(self, waypoint):
     return waypoint.twist.twist.linear.x
