@@ -96,10 +96,9 @@ class WaypointUpdater(object):
         return closest_idx
 
 
-    def publish_waypoints(self,index):
+    def publish_waypoints(self,closest_idx):
         lane = Lane()
 
-        closest_idx = self.get_closest_waypoint_idx()
         end_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_waypoints[closest_idx:end_idx]
 
@@ -108,7 +107,6 @@ class WaypointUpdater(object):
         else:
             dist_to_light = self.stop_line_wp - closest_wp_index
             lane.waypoints = self.decelerate(base_waypoints, dist_to_light)
-        return lane
 
         self.final_waypoints_pub.publish(lane)
 
