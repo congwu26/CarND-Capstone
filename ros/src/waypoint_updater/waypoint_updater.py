@@ -33,7 +33,6 @@ def get_waypoint_velocity(waypoint):
 
 def set_waypoint_velocity(waypoint, velocity):
     waypoint.twist.twist.linear.x = velocity
-    return waypoint
 
 
 class WaypointUpdater(object):
@@ -124,7 +123,7 @@ class WaypointUpdater(object):
             dec_vel = math.sqrt(2 * MAX_DECEL * dist)
             if dec_vel < 1:
                 dec_vel = 0.0
-            wp = set_waypoint_velocity(wp, min(dec_vel, get_waypoint_velocity(wp)))
+            set_waypoint_velocity(wp, min(dec_vel, get_waypoint_velocity(wp)))
             lane_wps.append(wp)
         return lane_wps
 
