@@ -96,5 +96,6 @@ class TLClassifier(object):
                 img_box[1] = np.int(detected_box[1] * img_shape[1])
                 img_box[2] = np.int(detected_box[2] * img_shape[0])
                 img_box[3] = np.int(detected_box[3] * img_shape[1])
+                img_box = img_box.astype(int)
                 return image[img_box[0]:img_box[2], img_box[1]:img_box[3]]
 

@@ -59,29 +59,20 @@ class TLDetector(object):
 
         rospy.spin()
 
+        
     def pose_cb(self, msg):
         self.pose = msg
 
+        
     def waypoints_cb(self, waypoints):
         if not self.waypoints_2d:
             self.waypoints_2d = [[waypoint.pose.pose.position.x, waypoint.pose.pose.position.y] for waypoint in waypoints.waypoints]
             self.waypoint_tree = KDTree(self.waypoints_2d)
         self.waypoints = waypoints.waypoints
 
+        
     def traffic_cb(self, msg):
         self.lights = msg.lights
-#         light_wp, state = self.process_traffic_lights()
-#         if self.state != state:
-#             self.state_count = 0
-#             self.state = state
-#         elif self.state_count >= STATE_COUNT_THRESHOLD:
-#             self.last_state = self.state
-#             light_wp = light_wp if state == TrafficLight.RED else -1
-#             self.last_wp = light_wp
-#             self.upcoming_red_light_pub.publish(Int32(light_wp))
-#         else:
-#             self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-#         self.state_count += 1
         
 
     def image_cb(self, msg):
@@ -93,7 +84,6 @@ class TLDetector(object):
 
         """
         self.has_image = True
-        rospy.loginfo("Received image!")
 
         if (self.image_counter == 0):
             self.camera_image = msg
@@ -153,7 +143,7 @@ class TLDetector(object):
 
         """
         # Test in simulation
-#         return light.state
+        # return light.state
         
         if(not self.has_image):
             self.prev_light_loc = None
