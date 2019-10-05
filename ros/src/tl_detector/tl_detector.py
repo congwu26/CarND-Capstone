@@ -26,6 +26,24 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
 
+        config_string = rospy.get_param("/traffic_light_config")
+        self.config = yaml.load(config_string)
+
+        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
+
+        self.bridge = CvBridge()
+        self.light_classifier = TLClassifier()
+
+        self.state = TrafficLight.UNKNOWN
+        self.last_state = TrafficLight.UNKNOWN
+        self.last_wp = -1
+        self.has_image = False
+        self.image_counter = 0
+        self.state_count = 0
+
+        self.waypoint_tree = None
+        self.waypoints_2d = None
+        
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
 
@@ -38,24 +56,6 @@ class TLDetector(object):
         '''
         sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
         sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
-
-        config_string = rospy.get_param("/traffic_light_config")
-        self.config = yaml.load(config_string)
-
-        self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
-
-        self.bridge = CvBridge()
-#         self.light_classifier = TLClassifier()
-
-        self.state = TrafficLight.UNKNOWN
-        self.last_state = TrafficLight.UNKNOWN
-        self.last_wp = -1
-        self.has_image = False
-        self.image_counter = 0
-        self.state_count = 0
-
-        self.waypoint_tree = None
-        self.waypoints_2d = None
 
         rospy.spin()
 
@@ -93,6 +93,7 @@ class TLDetector(object):
 
         """
         self.has_image = True
+        rospy.loginfo("Received image!")
 
         if (self.image_counter == 0):
             self.camera_image = msg
@@ -151,16 +152,18 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+        # Test in simulation
+#         return light.state
+        
         if(not self.has_image):
             self.prev_light_loc = None
             return TrafficLight.UNKNOWN
 
-#         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
         #Get classification
         if self.config['is_site']:
-#             return self.light_classifier.get_classification(cv_image)
-            return light.state
+            return self.light_classifier.get_classification(cv_image)
         else:
             return light.state
 
